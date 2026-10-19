@@ -1,1 +1,4 @@
 design-systems/
+.carouso/
+__pycache__/
+*.pyc
