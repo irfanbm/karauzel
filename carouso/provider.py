@@ -43,7 +43,7 @@ def save_config(config: ProviderConfig, path: Path = CONFIG_PATH) -> None:
 def complete(prompt: str, config: ProviderConfig | None = None) -> str:
     config = config or load_config()
     if not config.api_key or not config.base_url or not config.model:
-        raise RuntimeError("LLM provider is not configured")
+        raise RuntimeError("AI belum diatur. Buka Pengaturan AI dan isi API key.")
     url = config.base_url.rstrip("/") + "/chat/completions"
     body = json.dumps({"model": config.model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.8}).encode()
     request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "Authorization": f"Bearer {config.api_key}"}, method="POST")
@@ -51,15 +51,15 @@ def complete(prompt: str, config: ProviderConfig | None = None) -> str:
         with urllib.request.urlopen(request, timeout=45) as response:
             data = json.loads(response.read())
     except (urllib.error.URLError, TimeoutError, ValueError) as error:
-        raise RuntimeError(f"Provider request failed: {error}") from error
+        raise RuntimeError(f"Gagal menghubungi provider AI: {error}") from error
     try:
         return str(data["choices"][0]["message"]["content"])
     except (KeyError, IndexError, TypeError) as error:
-        raise RuntimeError("Provider returned an unexpected response") from error
+        raise RuntimeError("Jawaban provider AI tidak dikenali.") from error
 
 def test_connection(config: ProviderConfig) -> tuple[bool, str]:
     try:
         complete("Reply with only: ok", config)
-        return True, "Connection successful"
+        return True, "Koneksi berhasil."
     except RuntimeError as error:
         return False, str(error)

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review Body — Hero, Editorial, Closing</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 32px; background: #deded9; color: #252923; font-family: Arial, sans-serif; }
+.intro { max-width: 760px; margin-bottom: 28px; }
+.intro h1 { font-size: 22px; margin: 0 0 10px; }
+.intro p { font-size: 14px; line-height: 1.6; margin: 0; }
+main { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; }
+figure { margin: 0; width: min(100%, 432px); }
+figcaption { margin-bottom: 12px; font-size: 14px; }
+.slide { position: relative; width: 100%; aspect-ratio: 4 / 5; container-type: inline-size; overflow: hidden; background: #f7f5ef; }
+.artboard { position: absolute; inset: 0; display: grid; grid-template-rows: 7.4cqw minmax(0, 1fr) 7.4cqw; padding: 7.4cqw; }
+header, footer { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: 1.85cqw; line-height: 1.4; font-weight: 400; }
+header { align-self: stretch; border-bottom: 1px solid #bcc1b7; padding-bottom: 2.3cqw; }
+footer { align-self: stretch; border-top: 1px solid #bcc1b7; padding-top: 2.3cqw; }
+.brand, .handle { white-space: nowrap; }
+.section, .pagination { text-align: right; }
+.content { min-height: 0; min-width: 0; padding: 7.4cqw 0; }
+.content h2, .content p { margin: 0; font-weight: 400; }
+.content h2 { font-size: 5.8cqw; line-height: 1.16; letter-spacing: -.025em; text-wrap: balance; }
+.content p { font-size: 3.2cqw; line-height: 1.5; text-wrap: pretty; }
+.content .eyebrow { font-size: 2.2cqw; line-height: 1.4; letter-spacing: .06em; }
+.hero .content { display: flex; flex-direction: column; gap: 4.6cqw; padding-top: 10cqw; }
+.hero h2 { font-size: 6.3cqw; }
+.hero .lead { max-width: 94%; }
+.hero .topic-note { margin-top: auto; padding-top: 3.2cqw; border-top: 1px solid #bcc1b7; font-size: 2.6cqw; }
+.editorial .content { display: flex; flex-direction: column; gap: 4.6cqw; }
+.editorial .prose { display: grid; gap: 3.2cqw; }
+.editorial .takeaway { margin-top: auto; border-left: .3cqw solid #526d5a; padding-left: 3.2cqw; font-size: 2.9cqw; }
+.closing { background: #283d32; color: #f7f5ef; }
+.closing header, .closing footer { border-color: #7e9284; }
+.closing .content { display: flex; flex-direction: column; justify-content: center; gap: 4.6cqw; }
+.closing .action { margin-top: 2.8cqw; padding-top: 3.2cqw; border-top: 1px solid #7e9284; font-size: 3.2cqw; }
+.review-note { margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: #454c42; }
+@media (max-width: 500px) { body { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="intro"><h1>Review template body</h1><p>Tiga komposisi pada canvas proporsional 1080 × 1350. Header dan footer mengikuti contoh yang disetujui. Fokus review: ukuran judul, lebar teks, jarak antarblok, dan distribusi ruang body.</p></div>
+<main>
+<figure>
+<figcaption>01 / Hero</figcaption>
+<article class="slide hero" aria-label="Contoh body hero">
+<div class="artboard">
+<header><span class="brand">STUDIO CATATAN</span><span class="section">PANDUAN KONTEN</span></header>
+<section class="content">
+<p class="eyebrow">MULAI DARI SATU PESAN</p>
+<h2>Konten yang jelas memberi ruang untuk dibaca.</h2>
+<p class="lead">Bukan soal memenuhi setiap sudut. Susun satu gagasan utama, lalu beri jarak agar pembaca bisa mengikutinya.</p>
+<p class="topic-note">Catatan tentang hierarki, ritme, dan ruang.</p>
+</section>
+<footer><span class="handle">@studiocatatan</span><span class="pagination">01 / 03</span></footer>
+</div>
+</article>
+<p class="review-note">Judul 68 px · body 35 px. Pesan utama di atas; catatan pendukung di bawah.</p>
+</figure>
+<figure>
+<figcaption>02 / Editorial</figcaption>
+<article class="slide editorial" aria-label="Contoh body editorial">
+<div class="artboard">
+<header><span class="brand">STUDIO CATATAN</span><span class="section">PRINSIP DASAR</span></header>
+<section class="content">
+<h2>Beri setiap paragraf satu tugas.</h2>
+<div class="prose">
+<p>Judul mengenalkan gagasan. Paragraf pertama menjelaskan alasannya tanpa mengulang judul dengan kata yang berbeda.</p>
+<p>Paragraf berikutnya memberi contoh: pisahkan penjelasan dan kesimpulan dengan jarak yang cukup, agar alur baca tetap jelas.</p>
+</div>
+<p class="takeaway">Jika dua paragraf mengatakan hal yang sama, cukup pertahankan satu.</p>
+</section>
+<footer><span class="handle">@studiocatatan</span><span class="pagination">02 / 03</span></footer>
+</div>
+</article>
+<p class="review-note">Judul 63 px · body 35 px. Satu kolom penuh dengan kesimpulan terpisah.</p>
+</figure>
+<figure>
+<figcaption>03 / Closing</figcaption>
+<article class="slide closing" aria-label="Contoh body closing">
+<div class="artboard">
+<header><span class="brand">STUDIO CATATAN</span><span class="section">LANGKAH BERIKUTNYA</span></header>
+<section class="content">
+<p class="eyebrow">COBA PADA KONTEN BERIKUTNYA</p>
+<h2>Satu pesan.<br>Ruang yang cukup.</h2>
+<p>Pilih satu draft. Rapikan judulnya, pisahkan paragrafnya, lalu lihat kembali dari layar ponsel.</p>
+<p class="action">Simpan panduan ini untuk proses desain berikutnya.</p>
+</section>
+<footer><span class="handle">@studiocatatan</span><span class="pagination">03 / 03</span></footer>
+</div>
+</article>
+<p class="review-note">Judul 63 px · body 35 px. Grup pesan di tengah area body, dengan satu ajakan.</p>
+</figure>
+</main>
+</body>
+</html>

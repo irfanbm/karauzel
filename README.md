@@ -1,6 +1,6 @@
 <div align="center">
 
-# Carouso
+# Karauzel
 
 **An AI agent skill for scroll-stopping carousel posts.**
 
@@ -97,6 +97,51 @@ Every slide is held to the same bar:
 2. Trigger the skill. If no design system is locked yet, the onboarding dialog opens.
 3. Approve the rendered samples. Your design system is locked.
 4. Send a topic brief. Get back rendered JPGs.
+
+## Public API v1
+
+The public API is prepared for external tools and AI agents, with a versioned contract separate from the local UI API.
+
+Set API keys before serving:
+
+```powershell
+$env:CAROUSO_API_KEYS="demo-key,another-customer-key"
+python -m carouso serve
+```
+
+Requests must include `X-API-Key: <key>`.
+
+### Create and generate a project
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/projects \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: demo-key" \
+  -d '{"brief":{"topic":"5 cara berhenti menunda pekerjaan","goal":"engagement","audience":"karyawan usia 20-35","tone":"friendly","language":"id","slides":6,"structure":"auto","cta_type":"save"}}'
+```
+
+### Get project
+
+```bash
+curl http://127.0.0.1:8000/api/v1/projects/<project_id> \
+  -H "X-API-Key: demo-key"
+```
+
+### Regenerate slides
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/projects/<project_id>/generate \
+  -H "X-API-Key: demo-key"
+```
+
+### Validate project
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/projects/<project_id>/check \
+  -H "X-API-Key: demo-key"
+```
+
+Responses use a stable envelope such as `{"object":"project","data":{...}}`. UI routes remain separate under `/api/projects/...`.
 
 ## Package contents
 

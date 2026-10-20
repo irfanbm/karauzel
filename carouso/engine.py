@@ -40,6 +40,7 @@ class Brief:
     variation: str = "balanced"
     seed: str | None = None
     images: list[str] = field(default_factory=list)
+    handle: str = ""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Brief":
@@ -56,6 +57,7 @@ class Brief:
             variation=str(data.get("variation", cls.variation)).strip() or cls.variation,
             seed=str(data["seed"]) if data.get("seed") is not None else None,
             images=[str(item) for item in data.get("images", []) if str(item).strip()],
+            handle=str(data.get("handle", "")).strip(),
         )
 
 @dataclass
@@ -115,13 +117,34 @@ def _body(topic: str, index: int, total: int) -> str:
         return "Save this for the next time you need a clear starting point."
     return f"Connect this idea back to {topic.lower()}, then choose one small action you can repeat."
 
-def render_html(plan: CarouselPlan, title: str = "Carouso draft") -> str:
+def render_html(plan: CarouselPlan, title: str = "Carouso draft", design: dict[str, Any] | None = None) -> str:
+    from .design import clean_chrome
+
+    chrome = clean_chrome((design or {}).get("chrome"))
     slides = []
+    def visible(show: bool) -> str:
+        return "" if show else ' style="visibility:hidden" aria-hidden="true"'
+
     for slide in plan.slides:
+        total = len(plan.slides)
+        kind = chrome["indicator_type"]
+        indicator = f"{slide.number:02d} / {total:02d}"
+        if kind == "bar":
+            indicator = f'<i style="width:{slide.number / total * 100}%"></i>'
+        elif kind != "number":
+            indicator = "".join('<i class="active"></i>' if number == slide.number else '<i></i>' for number in range(1, total + 1))
+        page = f'<span class="chrome-indicator chrome-{kind}" aria-label="{slide.number} / {total}"{visible(chrome["page_indicator"])}>{indicator}</span>'
+        header_page = page if chrome["indicator_location"] == "header" else ""
+        footer_page = page if chrome["indicator_location"] == "footer" else "<span></span>"
+        header_style = ("visibility:hidden;" if slide.number == 1 and not chrome["first_header"] else "") + ("border-bottom-color:transparent;" if not chrome["header_divider"] else "")
         image = f'<img src="{html.escape(slide.image, quote=True)}" alt="" loading="eager">' if slide.image else ""
+        accent = "#526d5a"
+        visual = image or (f'<svg class="simple-visual" viewBox="0 0 240 160" aria-label="Ilustrasi sederhana"><rect x="24" y="30" width="192" height="100" rx="14" fill="none" stroke="{accent}" stroke-width="5"/><path d="M48 102l38-34 28 22 30-40 48 52" fill="none" stroke="{accent}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="178" cy="55" r="9" fill="{accent}"/></svg>' if slide.pattern in {"point", "solution", "proof", "ui-metric"} else "")
         slides.append(f'''<section class="slide mode-{slide.mode}" data-pattern="{html.escape(slide.pattern, quote=True)}" data-slide="{slide.number}">
-  <div class="eyebrow">{html.escape(slide.eyebrow)}</div>
-  <div class="content"><h1>{html.escape(slide.headline)}</h1><p>{html.escape(slide.body)}</p>{image}</div>
-  <div class="footer"><span>{slide.number:02d} / {len(plan.slides):02d}</span><span>{html.escape(plan.brief.style)}</span></div>
+  <div class="generated-artboard">
+    <header class="generated-header" style="{header_style}"><span{visible(chrome['header_title'])}>{html.escape(plan.brief.topic)}</span><span class="chrome-header-end"><span class="slide-category"{visible(chrome['header_category'])}>{html.escape(slide.eyebrow)}</span>{header_page}</span></header>
+     <div class="generated-content"><div class="content"><h1>{html.escape(slide.headline)}</h1><p>{html.escape(slide.body)}</p>{visual}</div></div>
+    <footer class="generated-footer"{visible(slide.number != 1 or chrome['first_footer'])}><span{visible(chrome['footer_brand'])}>{html.escape(plan.brief.handle)}</span>{footer_page}</footer>
+  </div>
 </section>''')
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)}</title><link rel="stylesheet" href="design-system/system.css"></head><body><main class="carousel">{"".join(slides)}</main></body></html>'''

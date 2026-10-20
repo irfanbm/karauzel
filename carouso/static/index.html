@@ -1,21 +1,366 @@
 <!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carouso</title><link rel="stylesheet" href="/app.css"></head>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Karauzel</title>
+  <meta name="page-route" content="brief">
+<link rel="stylesheet" href="/app.css">
+</head>
 <body>
-<header class="topbar"><a class="brand" href="/">carouso<span>.</span></a><div class="topbar-actions"><span class="status"><i></i> local mode</span><button class="quiet" id="settings">Settings</button></div></header>
-<main class="shell">
-<section class="intro"><p class="kicker">CAROUSEL STUDIO</p><h1>Turn an idea into<br><em>a carousel.</em></h1><p class="lede">Start with the message. Carouso handles the structure, gives you real variation, and keeps every slide ready to render.</p></section>
-<section class="workspace">
-<div class="steps" aria-label="Progress"><div class="step active"><b>01</b><span>Brief</span></div><div class="step"><b>02</b><span>Style</span></div><div class="step"><b>03</b><span>Generate</span></div></div>
-<form id="brief-form" class="card">
-<div class="card-heading"><div><p class="eyebrow">FIRST, THE ESSENTIALS</p><h2>What are we making?</h2></div><span class="required">Required</span></div>
-<label for="topic">Topic or working title <span>*</span></label><textarea id="topic" required placeholder="e.g. 5 ways to make your morning routine stick"></textarea>
-<div class="field-grid"><div><label for="audience">Who is it for?</label><input id="audience" value="general audience" /></div><div><label for="language">Language</label><select id="language"><option>English</option><option>Bahasa Indonesia</option></select></div></div>
-<div class="card-heading compact"><div><p class="eyebrow">MAKE IT YOURS</p><h2>Choose a starting style</h2></div><button type="button" class="text-button" id="advanced-toggle">Advanced</button></div>
-<div class="style-grid" role="radiogroup" aria-label="Starting style"><label class="style-option selected"><input type="radio" name="style" value="clean and minimal" checked><span class="swatch minimal"></span><strong>Clean minimal</strong><small>Quiet, editorial, focused</small></label><label class="style-option"><input type="radio" name="style" value="bold and energetic"><span class="swatch bold"></span><strong>Bold energy</strong><small>High contrast, punchy</small></label><label class="style-option"><input type="radio" name="style" value="warm and human"><span class="swatch warm"></span><strong>Warm human</strong><small>Friendly, tactile, open</small></label></div>
-<div class="advanced" id="advanced"><div><label for="slides">Slides</label><input id="slides" type="number" min="3" max="12" value="6"></div><div><label for="variation">Variation</label><select id="variation"><option>balanced</option><option>conservative</option><option>experimental</option></select></div><div><label for="seed">Seed <small>(optional)</small></label><input id="seed" placeholder="repeat a direction"></div></div>
-<button class="primary" type="submit">Generate a direction <span>→</span></button><p class="hint">No API key needed for this first pass. Add a provider in Settings when you want LLM-powered copy and HTML variations.</p>
-</form>
-<aside class="preview-panel"><div class="preview-top"><div><p class="eyebrow">LIVE DIRECTION</p><h2 id="preview-title">Your carousel<br><em>starts here.</em></h2></div><span class="badge" id="signature">DRAFT</span></div><div id="preview-empty" class="empty-preview"><div class="empty-mark">✦</div><p>Your generated slide plan will appear here.</p><small>Different patterns. Same visual point of view.</small></div><div id="preview-result" class="result" hidden><div class="result-meta"><span id="result-style"></span><span id="result-count"></span></div><ol id="slide-list"></ol><button class="secondary" id="download" type="button">Download HTML <span>↓</span></button></div></aside>
-</section></main><dialog id="settings-dialog"><form method="dialog" class="settings-card"><div class="card-heading"><div><p class="eyebrow">LOCAL CONFIG</p><h2>Provider settings</h2></div><button class="quiet" value="cancel">Close</button></div><label for="provider">Provider</label><select id="provider"><option value="openai-compatible">OpenAI-compatible</option><option value="ollama">Ollama</option></select><label for="base-url">Base URL</label><input id="base-url" placeholder="https://api.example.com/v1"><label for="model">Model</label><input id="model" placeholder="model-name"><label for="api-key">API key</label><input id="api-key" type="password" placeholder="Stored only on this machine"><label class="check"><input id="send-images" type="checkbox"> Allow images to be sent to the provider</label><div class="settings-actions"><button type="button" class="secondary" id="test-provider">Test connection</button><button type="button" class="primary" id="save-provider">Save settings</button></div><p class="hint">Keys are saved in .carouso/config.json and never included in generated HTML.</p></form></dialog><div class="toast" id="toast" role="status"></div><script src="/app.js"></script>
-</body></html>
+<header class="topbar">
+  <a class="brand" id="brand-home" href="/dashboard">karauzel<span>.</span></a>
+  <nav class="progress-steps" aria-label="Progress project">
+    <span class="progress-line" aria-hidden="true"></span>
+    <button class="progress-step active" data-route="/brief" aria-current="step"><b>01</b><span>Brief</span></button>
+    <button class="progress-step" data-route="/design"><b>02</b><span>Desain</span></button>
+    <button class="progress-step" data-route="/export"><b>03</b><span>Export</span></button>
+  </nav>
+  <div class="topbar-actions">
+    <span class="save-state" id="save-state" aria-live="polite"></span>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Aktifkan dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg></button>
+    <button class="project-trigger" id="project-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
+      <span class="project-trigger-label">Project</span>
+      <svg class="project-trigger-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+    </button>
+    <button class="settings-trigger" id="settings" type="button" aria-label="Pengaturan AI">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 3.7 10.6 2h2.8l.9 1.7 1.9.8 1.9-.4 2 2-1 1.7.8 1.9 1.7.9v2.8l-1.7.9-.8 1.9 1 1.7-2 2-1.9-.4-1.9.8-.9 1.7h-2.8l-.9-1.7-1.9-.8-1.9.4-2-2 1-1.7-.8-1.9-1.7-.9v-2.8l1.7-.9.8-1.9-1-1.7 2-2 1.9.4 1.9-.8Z"/><circle cx="12" cy="12" r="3.2"/></svg>
+      <span>Pengaturan AI</span>
+     </button>
+      </div>
+ </header>
+  <div class="route-panel user-dashboard" id="dashboard-panel" hidden>
+    <div class="app-shell"><aside class="app-sidebar"><div class="sidebar-brand"><span class="brand-symbol">c</span><div><b>carouso</b><small>creator workspace</small></div></div><button class="sidebar-create" id="user-new-project" type="button"><span>＋</span> New project</button><nav class="side-nav" aria-label="User navigation"><span class="side-label">Workspace</span><a class="side-link active" href="/dashboard"><span>⌂</span> Overview</a><a class="side-link" href="#projects"><span>▱</span> My projects <em>0</em></a><a class="side-link" href="#exports"><span>↗</span> Exports</a><span class="side-label">Account</span><a class="side-link" href="#brand"><span>◈</span> Brand kit</a><a class="side-link" href="#settings"><span>⚙</span> Settings</a></nav><div class="sidebar-profile"><span class="avatar">U</span><div><b>Your workspace</b><small>Free plan</small></div><span>···</span></div></aside><main class="app-main"><header class="workspace-top"><div><span class="eyebrow">Workspace / personal</span><h1>Good morning, creator.</h1></div><div class="top-actions"><button class="icon-action" type="button" aria-label="Help">?</button><button class="profile-chip" type="button"><span class="avatar">U</span> User</button></div></header><section class="workspace-intro"><div><p class="section-kicker">Overview</p><h2>A clear space for your next idea.</h2><p class="lede">Satu ruang kerja untuk menyusun, merapikan, dan menerbitkan carousel.</p></div><div class="date-note">October 21, 2026<br><span>Local workspace</span></div></section><div class="dashboard-grid"><article class="metric-card accent"><span class="metric-label">Projects</span><strong>0</strong><small>Siap untuk project pertama</small></article><article class="metric-card"><span class="metric-label">Exports bulan ini</span><strong>0</strong><small>PNG, HTML, dan PDF</small></article><article class="metric-card"><span class="metric-label">Storage</span><strong>0 MB</strong><small>Dari 500 MB tersedia</small></article><article class="metric-card"><span class="metric-label">Plan saat ini</span><strong>Free</strong><small>Upgrade kapan saja</small></article></div><section class="dashboard-card user-empty"><div class="empty-mark">✦</div><span class="eyebrow">Start creating</span><h2>Mulai dari ide yang ada di kepala</h2><p class="help">Tulis brief singkat. Carouso akan membantu menyusun alur, desain, dan export yang siap dipakai.</p><button class="secondary" type="button" id="user-start-brief">Buat carousel pertama <span aria-hidden="true">→</span></button></section></main></div>
+  </div>
+  <div class="route-panel admin-dashboard" id="admin-dashboard-panel" hidden>
+    <div class="app-shell admin-shell"><aside class="app-sidebar"><div class="sidebar-brand"><span class="brand-symbol admin-mark">✦</span><div><b>carouso</b><small>admin control room</small></div></div><div class="admin-status"><i></i> All systems local</div><nav class="side-nav" aria-label="Admin navigation"><span class="side-label">Monitor</span><a class="side-link active" href="/admin-dashboard"><span>◒</span> Overview</a><a class="side-link" href="#users"><span>♙</span> Users <em>—</em></a><a class="side-link" href="#projects"><span>▱</span> Projects</a><span class="side-label">Manage</span><a class="side-link" href="#compositions"><span>⌘</span> Composition bank</a><a class="side-link" href="#media"><span>▧</span> Media library</a><a class="side-link" href="#settings"><span>⚙</span> Settings</a></nav><div class="sidebar-profile"><span class="avatar admin-avatar">A</span><div><b>Administrator</b><small>Full access</small></div><span>···</span></div></aside><main class="app-main"><header class="workspace-top"><div><span class="eyebrow">Control room / internal</span><h1>System overview</h1></div><div class="top-actions"><span class="live-badge"><i></i> Local mode</span><button class="profile-chip" type="button"><span class="avatar admin-avatar">A</span> Admin</button></div></header><section class="workspace-intro"><div><p class="section-kicker">Operations</p><h2>Keep the product in motion.</h2><p class="lede">Pantau produk, pengguna, komposisi layout, dan aktivitas sistem dari satu ruang kerja.</p></div><button class="secondary" id="dashboard-refresh" type="button">↻ Refresh data</button></section><div class="dashboard-grid"><article class="metric-card accent"><span class="metric-label">Active users</span><strong>—</strong><small>Menunggu Supabase Auth</small></article><article class="metric-card"><span class="metric-label">Projects dibuat</span><strong>—</strong><small>Semua workspace</small></article><article class="metric-card"><span class="metric-label">Exports berhasil</span><strong>—</strong><small>7 hari terakhir</small></article><article class="metric-card"><span class="metric-label">System health</span><strong class="status-live">Ready</strong><small>Local mode · stable</small></article></div><div class="dashboard-columns"><section class="dashboard-card"><div class="card-heading"><div><span class="eyebrow">Composition bank</span><h2>Layout library</h2></div><button class="link" type="button">Manage bank →</button></div><div class="composition-list"><div><b>Editorial single</b><span>Single-column statement</span><em>Published</em></div><div><b>Split text visual</b><span>Copy + image balance</span><em>Draft</em></div><div><b>CTA focused</b><span>Closing slide emphasis</span><em>Published</em></div></div></section><section class="dashboard-card"><div class="card-heading"><div><span class="eyebrow">System activity</span><h2>Recent events</h2></div><button class="link" type="button">View all →</button></div><ul class="activity-list"><li><i></i><div><b>Admin dashboard ready</b><small>Local workspace · just now</small></div></li><li><i class="muted"></i><div><b>Supabase connection pending</b><small>Setup guide is ready</small></div></li><li><i class="muted"></i><div><b>Composition bank initialized</b><small>3 layouts registered</small></div></li></ul></section></div></main></div>
+  </div>
+ <dialog class="project-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+  <div class="project-dialog-head">
+    <div><span class="eyebrow">Workspace</span><h2 id="project-dialog-title">Project Anda</h2></div>
+    <button class="icon" id="close-projects" type="button" aria-label="Tutup project">×</button>
+  </div>
+  <button class="new-project" id="new-project" type="button"><span>＋</span><span><strong>Project baru</strong><small>Mulai brief dari awal</small></span></button>
+  <div class="project-list" id="project-list"><p class="project-empty">Memuat project…</p></div>
+</dialog>
+
+<div class="fatal" id="fatal" role="alert" hidden>
+  <strong id="fatal-title"></strong>
+  <p id="fatal-detail"></p>
+  <div class="error-actions">
+    <button class="secondary copy-error" type="button" data-copy-error="fatal">Salin error</button>
+    <button class="link" id="retry-server" type="button">Coba lagi</button>
+  </div>
+</div>
+
+<main class="layout">
+  <form class="brief brief-only" id="brief" novalidate>
+    <h1>Brief</h1>
+    <p class="lede">Tulis apa yang mau disampaikan. Isi slide bisa dibuat AI, lalu Anda edit.</p>
+
+    <fieldset>
+      <legend>Isi pokok</legend>
+      <label for="topic">Topik atau judul <span class="req" aria-hidden="true">*</span></label>
+      <textarea id="topic" name="topic" rows="2" required placeholder="Contoh: 5 cara berhenti menunda pekerjaan"></textarea>
+      <p class="field-error" id="topic-error" hidden>Topik wajib diisi.</p>
+
+      <div class="row">
+        <div>
+          <label for="goal">Tujuan</label>
+          <select id="goal" name="goal">
+            <option value="educate">Edukasi</option>
+            <option value="sell">Jualan</option>
+            <option value="awareness">Awareness</option>
+            <option value="personal-brand">Personal branding</option>
+            <option value="engagement">Interaksi</option>
+          </select>
+        </div>
+        <div>
+          <label for="audience">Untuk siapa</label>
+          <input id="audience" name="audience" placeholder="Contoh: mahasiswa tingkat akhir">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="language">Bahasa</label>
+          <select id="language" name="language">
+            <option>Bahasa Indonesia</option>
+            <option>English</option>
+          </select>
+        </div>
+        <div>
+          <label for="tone">Gaya bahasa</label>
+          <select id="tone" name="tone">
+            <option value="friendly">Santai, ramah</option>
+            <option value="professional">Profesional</option>
+            <option value="bold">Tegas, berani</option>
+            <option value="playful">Jenaka</option>
+            <option value="calm">Tenang</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Struktur konten</legend>
+      <div class="structures" id="structures" role="radiogroup" aria-label="Struktur konten"></div>
+      <div class="row">
+        <div>
+          <label for="slides">Jumlah slide</label>
+          <input id="slides" name="slides" type="number" min="3" max="12" value="6" inputmode="numeric">
+        </div>
+        <div></div>
+      </div>
+      <p class="flow" id="flow" aria-live="polite"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Penutup (CTA)</legend>
+      <div class="row">
+        <div>
+          <label for="cta_type">Ajakan</label>
+          <select id="cta_type" name="cta_type">
+            <option value="save">Simpan postingan</option>
+            <option value="share">Bagikan</option>
+            <option value="follow">Follow akun</option>
+            <option value="comment">Komentar</option>
+            <option value="dm">Kirim DM</option>
+            <option value="link">Kunjungi link</option>
+          </select>
+        </div>
+        <div>
+          <label for="handle">Handle akun</label>
+          <input id="handle" name="handle" placeholder="@akunanda" autocomplete="off">
+        </div>
+      </div>
+      <label for="cta_detail">Detail ajakan <span class="opt">opsional</span></label>
+      <input id="cta_detail" name="cta_detail" placeholder="Contoh: komentar 'MAU' untuk dapat template-nya">
+    </fieldset>
+
+    <details class="source">
+      <summary>Bahan referensi <span class="opt">opsional</span></summary>
+      <p class="help">Tempel catatan, artikel, atau poin Anda. AI akan menulis berdasarkan bahan ini. Fakta yang tidak ada di bahan diberi tanda untuk dicek.</p>
+      <label class="sr-only" for="source">Bahan referensi</label>
+      <textarea id="source" name="source" rows="6" maxlength="12000"></textarea>
+    </details>
+
+    <button class="primary" id="generate" type="button">Buat isi slide</button>
+    <p class="hint" id="generate-hint"></p>
+  </form>
+
+  <section class="slides-panel" aria-labelledby="slides-title">
+    <div class="design-panel" id="design-panel" hidden>
+      <div class="design-intro"><div><span class="eyebrow">Design studio</span><h2>Bangun wajah carousel</h2><p class="help">Tentukan arah visual, rapikan tipografi, lalu biarkan AI menyusun desainnya.</p></div><button class="link" id="back-to-brief" type="button">Kembali ke Brief</button></div>
+      <nav class="design-tabs" aria-label="Bagian desain" role="tablist">
+        <button class="design-tab active" role="tab" aria-selected="true" aria-controls="design-layout" data-design-tab="layout">Layout <span>01</span></button>
+        <button class="design-tab" role="tab" aria-selected="false" aria-controls="design-content" data-design-tab="content">Isi konten <span>02</span></button>
+        <button class="design-tab" role="tab" aria-selected="false" aria-controls="design-preview" data-design-tab="preview">Preview <span>03</span></button>
+      </nav>
+      <section class="design-view active" id="design-layout" role="tabpanel">
+        <div class="section-heading"><div><span class="eyebrow">01 / Layout</span><h3>Pilih arah visual</h3><p class="help">Racik sendiri atau tiru gaya dari referensi. Mode yang aktif dipakai saat generate.</p></div></div>
+        <div class="layout-modes" role="tablist" aria-label="Sumber gaya">
+          <button class="layout-mode active" role="tab" aria-selected="true" aria-controls="mode-custom" data-layout-mode="custom"><strong>Racik sendiri</strong><small>Pilih gaya, ukuran, dan warna</small></button>
+          <button class="layout-mode" role="tab" aria-selected="false" aria-controls="mode-reference" data-layout-mode="reference"><strong>Referensi</strong><small>Analisa link atau gambar</small></button>
+        </div>
+        <div class="layout-mode-view" id="mode-custom" role="tabpanel">
+          <div class="design-group"><h4>Gaya layout</h4><div class="option-grid option-grid-4" id="layout-recipes"></div>
+            <div class="layout-custom" id="layout-custom-box" hidden>
+              <label for="layout-custom">Tulis arahan layout Anda</label>
+              <textarea id="layout-custom" rows="3" maxlength="500" placeholder="Contoh: poster minimalis, headline kapital rata tengah, banyak ruang kosong, garis tipis sebagai pemisah"></textarea>
+              <p class="help">Arahan diterjemahkan ke sistem layout. Aturan dasar tetap dijaga: satu fokus per slide, maksimal dua jenis huruf, kontras terbaca.</p>
+            </div>
+          </div>
+          <div class="design-group"><h4>Tipografi</h4><div class="option-grid" id="type-options"></div></div>
+          <div class="design-group"><h4>Ukuran kanvas</h4><div class="option-grid" id="ratio-options"></div></div>
+          <div class="design-group"><h4>Palet warna</h4><div class="option-grid option-grid-4" id="palette-options"></div>
+            <div class="palette-custom" id="palette-custom-box" hidden>
+              <label class="color-field"><span>Latar</span><input type="color" data-color="bg"><code data-color-code="bg"></code></label>
+              <label class="color-field"><span>Teks</span><input type="color" data-color="text"><code data-color-code="text"></code></label>
+              <label class="color-field"><span>Aksen</span><input type="color" data-color="accent"><code data-color-code="accent"></code></label>
+              <p class="contrast-note" id="contrast-note" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+        <div class="layout-mode-view" id="mode-reference" role="tabpanel" hidden>
+          <div class="design-group">
+            <h4>Referensi <span class="opt">maks 6</span></h4>
+            <p class="help">Tempel link (website, Pinterest, Dribbble, posting) atau upload gambar. Klik Analisa untuk membaca gayanya.</p>
+            <ul class="reference-list" id="reference-list"></ul>
+            <p class="help reference-empty" id="reference-empty">Belum ada referensi.</p>
+            <div class="reference-add" id="reference-add-row">
+              <label class="sr-only" for="reference-url">Link referensi</label>
+              <input id="reference-url" type="url" placeholder="https://contoh.com/inspirasi">
+              <button class="secondary" type="button" id="reference-url-add">Tambah link</button>
+              <label class="secondary file-btn">Upload gambar<input id="reference-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label>
+            </div>
+            <div class="analyze-row"><button class="secondary" type="button" id="analyze-reference">Analisa referensi</button><span class="help" id="analyze-state"></span></div>
+          </div>
+          <div class="design-group" id="reference-result" hidden>
+            <h4>Hasil analisa</h4>
+            <p class="reference-summary" id="reference-summary"></p>
+            <p class="help">Matikan poin yang tidak ingin ditiru, atau ubah nilainya.</p>
+            <div class="point-groups" id="reference-points"></div>
+          </div>
+        </div>
+        <div class="design-actions"><button class="primary" id="generate-design" type="button">Generate desain</button><button class="secondary" id="continue-export" type="button">Lanjut ke Export</button></div>
+      </section>
+      <section class="design-view" id="design-content" role="tabpanel" hidden>
+        <div class="section-heading"><div><span class="eyebrow">02 / Isi konten</span><h3>Format tanpa mengubah naskah</h3><p class="help">Teks dikunci dari Brief. Blok sebagian kalimat untuk memunculkan menu format.</p></div></div>
+        <p class="help" id="content-empty" hidden>Belum ada isi slide. Buat dulu di Brief.</p>
+        <div class="content-editor-list" id="design-cards"></div>
+      </section>
+      <section class="design-view" id="design-preview" role="tabpanel" hidden>
+        <div class="section-heading"><div><span class="eyebrow">03 / Preview</span><h3>Lihat alur carousel</h3><p class="help" id="preview-meta"></p></div><button class="secondary" type="button" id="regenerate-design" hidden>Generate ulang</button></div>
+        <section class="design-group preview-chrome" aria-labelledby="preview-chrome-title">
+          <h4 id="preview-chrome-title">Header & footer</h4>
+          <div id="chrome-controls"></div>
+        </section>
+        <div class="preview-empty" id="preview-empty"><strong>Belum ada desain.</strong><p class="help">Atur pilihan di tab Layout, lalu klik <b>Generate desain</b>. Hasilnya akan tampil di sini.</p></div>
+        <div class="carousel-preview" id="carousel-preview"></div>
+        <ul class="design-notes" id="design-notes"></ul>
+      </section>
+    </div>
+    <div class="design-loading" id="design-loading" role="status" aria-live="polite" hidden><span class="loading-spinner" aria-hidden="true"></span><span id="design-loading-label">Menyusun desain…</span></div>
+    <div class="route-panel" id="export-panel" hidden>
+      <div class="slides-head"><div><span class="eyebrow">Export</span><h2>Export project</h2></div><button class="link" id="back-to-design" type="button">Kembali ke Desain</button></div>
+      <p class="help" id="export-summary">Simpan hasil preview yang sudah kamu review.</p>
+      <div class="export-actions"><button class="primary" id="download-html" type="button">Simpan HTML</button><button class="secondary" id="download-png" type="button">Simpan PNG</button></div>
+      <div class="export-preview" id="export-preview"></div>
+    </div>
+    <div class="slides-head brief-only">
+      <h2 id="slides-title">Isi slide</h2>
+      <span class="count" id="slide-count"></span>
+    </div>
+    <div id="empty" class="empty brief-only">
+      <svg viewBox="0 0 80 60" aria-hidden="true"><rect x="12" y="12" width="56" height="36" rx="6"/><path d="M22 25h24M22 34h36"/><circle cx="61" cy="19" r="3"/></svg>
+      <p><strong>Brief menunggu sentuhan pertama.</strong></p>
+      <p class="help">Isi brief, lalu klik <strong>Buat isi slide</strong>. Anda juga bisa menulis sendiri di kerangka di bawah.</p>
+    </div>
+    <div class="slide-workspace brief-only">
+      <ol class="slide-list" id="slide-list"></ol>
+      <aside class="mini-preview" aria-label="Preview slide">
+        <span class="preview-label">Preview</span>
+        <div id="mini-preview-list"></div>
+      </aside>
+    </div>
+    <button class="ghost brief-only" id="add-slide" type="button">+ Tambah slide</button>
+
+    <div class="next brief-only">
+      <ul class="issues" id="issues"></ul>
+      <button class="primary" id="next" type="button">Lanjut ke Desain</button>
+    </div>
+  </section>
+</main>
+<div class="format-float" id="format-float" role="toolbar" aria-label="Format teks" hidden>
+  <button type="button" data-format="bold" aria-label="Tebal" title="Tebal"><b>B</b></button>
+  <button type="button" data-format="italic" aria-label="Miring" title="Miring"><i>I</i></button>
+  <button type="button" data-format="underline" aria-label="Garis bawah" title="Garis bawah"><u>U</u></button>
+  <span class="format-sep"></span>
+  <select id="format-important" aria-label="Penting" title="Gaya highlight penting"><option value="">Penting</option><option value="marker">Marker</option><option value="underline">Underline</option><option value="accent">Aksen</option><option value="label">Label</option></select>
+  <select id="format-font" aria-label="Font"><option value="" disabled>Font</option><option value="system">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option><option value="display">Display</option></select>
+  <button type="button" id="format-clear" aria-label="Hapus format" title="Hapus format">Tx</button>
+</div>
+
+<template id="slide-template">
+  <li class="slide-card">
+    <div class="card-top">
+      <span class="num"></span>
+      <label class="sr-only">Peran slide</label>
+      <select class="role"></select>
+      <div class="card-tools">
+        <button type="button" class="icon" data-action="up" aria-label="Pindah ke atas" title="Pindah ke atas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
+        <button type="button" class="icon" data-action="down" aria-label="Pindah ke bawah" title="Pindah ke bawah"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m6-6-6 6-6-6"/></svg></button>
+        <button type="button" class="icon" data-action="lock" aria-pressed="false" aria-label="Kunci slide" title="Kunci: tidak ikut berubah saat buat ulang"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path class="shackle" d="M8 11V8a4 4 0 0 1 7.5-2"/></svg></button>
+        <button type="button" class="icon" data-action="regen" aria-label="Buat ulang slide ini" title="Buat ulang slide ini"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></button>
+        <button type="button" class="icon danger" data-action="delete" aria-label="Hapus slide" title="Hapus slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="fields">
+        <label class="small">Judul <span class="wc" data-for="headline"></span></label>
+        <div class="headline-options" hidden></div>
+        <textarea class="headline" rows="1" placeholder="Judul slide"></textarea>
+        <label class="small">Isi <span class="wc" data-for="body"></span></label>
+        <textarea class="body" rows="3" placeholder="Isi slide"></textarea>
+        <label class="small">Poin-poin <span class="opt">satu per baris, opsional</span></label>
+        <textarea class="bullets" rows="2"></textarea>
+        <p class="note" hidden></p>
+      </div>
+      <div class="image-slot">
+        <div class="image-gallery" aria-label="Gambar slide"></div>
+        <button type="button" class="image-btn" data-action="image" aria-label="Tambah gambar">
+          <span class="image-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>
+          </span>
+          <span class="image-label">Tambah gambar</span>
+        </button>
+        <button type="button" class="link remove-image" data-action="remove-image" hidden>Hapus semua</button>
+      </div>
+    </div>
+  </li>
+</template>
+
+<dialog id="regenerate-dialog">
+  <form method="dialog" class="dialog confirm-dialog">
+    <span class="dialog-kicker">AI Studio</span>
+    <h2>Buat ulang slide?</h2>
+    <p class="help" id="regenerate-message">Isi slide ini akan dibuat ulang berdasarkan brief dan referensi yang tersedia.</p>
+    <div class="dialog-actions"><button class="link" value="cancel">Batal</button><button class="primary" id="confirm-regenerate" value="default">Buat ulang</button></div>
+  </form>
+</dialog>
+
+<dialog id="image-dialog">
+  <form method="dialog" class="dialog">
+    <h2>Tambah gambar</h2>
+    <div class="drop" id="drop" tabindex="0">
+      <p>Seret gambar ke sini, atau</p>
+      <label class="secondary file-btn">Pilih file<input type="file" id="image-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden></label>
+      <p class="help">JPG, PNG, WebP, GIF. Maks 15 MB.</p>
+    </div>
+    <label for="image-url">Atau tempel URL gambar</label>
+    <div class="url-row">
+      <input id="image-url" type="url" placeholder="https://...">
+      <button type="button" class="secondary" id="image-url-add">Ambil</button>
+    </div>
+    <p class="field-error" id="image-error" hidden></p>
+    <div class="dialog-actions"><button class="link" value="cancel">Batal</button></div>
+  </form>
+</dialog>
+
+<dialog id="settings-dialog">
+  <form method="dialog" class="dialog">
+    <span class="dialog-kicker">Workspace settings</span><h2>Pengaturan workspace</h2>
+    <p class="help">Kelola preferensi workspace, koneksi AI, dan perilaku generator dari satu tempat.</p>
+    <div class="settings-section"><strong>AI provider</strong><span>Model yang digunakan untuk menyusun isi dan menganalisa referensi.</span></div>
+    <label for="provider">Provider</label>
+    <select id="provider">
+      <option value="openai-compatible">OpenAI-compatible</option>
+      <option value="ollama">Ollama (lokal)</option>
+    </select>
+    <label for="base-url">Base URL</label>
+    <input id="base-url" placeholder="https://api.openai.com/v1">
+    <label for="model">Model</label>
+    <input id="model" placeholder="nama-model">
+    <label for="api-key">API key</label>
+    <input id="api-key" type="password" autocomplete="off">
+    <p class="help" id="key-state"></p>
+    <label class="check"><input id="send-images" type="checkbox"> Izinkan gambar dikirim ke provider</label>
+    <p class="help visual-help">Aktifkan hanya jika model yang dipilih memiliki <strong>modalities visual</strong> atau kemampuan menerima input gambar. Model teks biasa tidak dapat membaca gambar.</p>
+    <div class="settings-section"><strong>Workspace defaults</strong><span>Preferensi ini menjadi default untuk project baru.</span></div>
+    <div class="row"><div><label for="default-language">Bahasa</label><select id="default-language"><option>Bahasa Indonesia</option><option>English</option></select></div><div><label for="default-ratio">Rasio default</label><select id="default-ratio"><option>4:5</option><option>1:1</option><option>9:16</option></select></div></div>
+    <label class="check"><input id="auto-save" type="checkbox" checked> Simpan perubahan otomatis</label>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" id="test-provider">Tes koneksi</button>
+      <button type="button" class="primary" id="save-provider">Simpan</button>
+      <button class="link" value="cancel">Tutup</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span id="toast-message"></span>
+  <button class="toast-copy" type="button" data-copy-error="toast" aria-label="Salin pesan error" hidden>Salin error</button>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

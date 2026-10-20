@@ -1,4 +1,9 @@
 design-systems/
 .carouso/
+projects/
+test-run/
 __pycache__/
 *.pyc
+.env
+.env.*
+!.env.example

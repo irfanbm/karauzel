@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studi Header & Footer — 3 Slide</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 32px; background: #deded9; color: #252923; font-family: Arial, sans-serif; }
+main { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; }
+figure { margin: 0; width: min(100%, 432px); }
+figcaption { margin-bottom: 12px; font-size: 14px; }
+.slide { position: relative; width: 100%; aspect-ratio: 4 / 5; container-type: inline-size; overflow: hidden; background: #f7f5ef; }
+.artboard { position: absolute; inset: 0; display: grid; grid-template-rows: 7.4cqw minmax(0, 1fr) 7.4cqw; padding: 7.4cqw; }
+header, footer { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: 1.85cqw; line-height: 1.4; font-weight: 400; }
+header { align-self: stretch; border-bottom: 1px solid #bcc1b7; padding-bottom: 2.3cqw; }
+footer { align-self: stretch; border-top: 1px solid #bcc1b7; padding-top: 2.3cqw; }
+.brand, .handle { white-space: nowrap; }
+.section, .pagination { text-align: right; }
+.content { min-height: 0; padding: 5.55cqw 0; display: flex; flex-direction: column; justify-content: center; gap: 3.4cqw; }
+h1, h2, p { margin: 0; font-weight: 400; }
+h1, h2 { font-size: 6.3cqw; line-height: 1.15; letter-spacing: -.025em; max-width: 100%; }
+p { font-size: 3.15cqw; line-height: 1.5; max-width: 92%; }
+.cover .content { justify-content: flex-start; padding-top: 12cqw; }
+.cta { background: #283d32; color: #f7f5ef; }
+.cta header, .cta footer { border-color: #7e9284; }
+.cta .content { justify-content: center; }
+@media (max-width: 500px) { body { padding: 16px; } }
+</style>
+</head>
+<body>
+<main>
+<figure>
+<figcaption>01 / Cover — canvas 1080 × 1350</figcaption>
+<article class="slide cover" aria-label="Slide cover">
+<div class="artboard">
+<header><span class="brand">STUDIO CATATAN</span><span class="section">PANDUAN KONTEN</span></header>
+<section class="content"><h1>Desain yang nyaman dimulai dari ruang.</h1><p>Studi posisi header dan footer. Area tengah hanya berfungsi sebagai konten penguji.</p></section>
+<footer><span class="handle">@studiocatatan</span><span class="pagination">01 / 03</span></footer>
+</div>
+</article>
+</figure>
+<figure>
+<figcaption>02 / Body — header/footer identik</figcaption>
+<article class="slide" aria-label="Slide isi">
+<div class="artboard">
+<header><span class="brand">STUDIO CATATAN</span><span class="section">PRINSIP DASAR</span></header>
+<section class="content"><h2>Jaga posisi, bukan sekadar jarak.</h2><p>Header selalu berada di baris atas. Footer selalu berada di baris bawah. Keduanya tidak ikut bergeser saat jumlah teks berubah.</p><p>Konten memiliki area terpisah dan tidak menumpuk di atas footer.</p></section>
+<footer><span class="handle">@studiocatatan</span><span class="pagination">02 / 03</span></footer>
+</div>
+</article>
+</figure>
+<figure>
+<figcaption>03 / CTA — posisi tetap, warna terbalik</figcaption>
+<article class="slide cta" aria-label="Slide ajakan">
+<div class="artboard">
+<header><span class="brand">STUDIO CATATAN</span><span class="section">LANGKAH BERIKUTNYA</span></header>
+<section class="content"><h2>Simpan sebagai patokan desainmu.</h2><p>Koreksi posisi, ukuran, dan jarak header serta footer terlebih dahulu sebelum melanjutkan ke komposisi konten.</p></section>
+<footer><span class="handle">@studiocatatan</span><span class="pagination">03 / 03</span></footer>
+</div>
+</article>
+</figure>
+</main>
+</body>
+</html>
